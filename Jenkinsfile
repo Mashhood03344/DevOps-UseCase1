@@ -3,21 +3,19 @@ node {
 
     stage('Clone repository') {
         /* Let's make sure we have the repository cloned to our workspace */
-
-        checkout scm
+        checkout([$class: 'GitSCM', branches: [[name: '*/main']], 
+                  userRemoteConfigs: [[url: 'https://github.com/Mashhood03344/DevOps-useCase1.git']]])
     }
 
     stage('Build image') {
         /* This builds the actual image; synonymous to
          * docker build on the command line */
-
         app = docker.build("edureka1/edureka")
     }
 
     stage('Test image') {
         /* Ideally, we would run a test framework against our image.
          * For this example, we're using a Volkswagen-type approach ;-) */
-
         app.inside {
             sh 'echo "Tests passed"'
         }
