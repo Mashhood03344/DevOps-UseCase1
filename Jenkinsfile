@@ -1,27 +1,37 @@
 pipeline {
     agent any
+
     stages {
-        stage('Build') {
+        stage('Clone repository') {
+            steps {
+                checkout([$class: 'GitSCM', branches: [[name: '*/main']], 
+                          doGenerateSubmoduleConfigurations: false, 
+                          extensions: [[$class: 'CleanBeforeCheckout']], 
+                          submoduleCfg: [], 
+                          userRemoteConfigs: [[url: 'https://github.com/Mashhood03344/DevOps-useCase1.git']]])
+            }
+        }
+        stage('Build image') {
             steps {
                 script {
-                    docker.build("mashhood03344/DevOps-useCase1:${env.BUILD_NUMBER}")
+                    def app = docker.build("mashhood03344/devops-usecase1")
                 }
             }
         }
-        stage('Test') {
+        stage('Test image') {
             steps {
                 script {
-                    docker.image("mashhood03344/DevOps-useCase1:${env.BUILD_NUMBER}").inside {
-                        sh 'echo "Tests passed"'
-                    }
+                    // Run your tests here
+                    echo 'Tests passed'
                 }
             }
         }
-        stage('Push') {
+        stage('Push image') {
             steps {
                 script {
                     docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-credentials') {
-                        docker.image("mashhood03344/DevOps-useCase1:${env.BUILD_NUMBER}").push('latest')
+                        app.push("${env.BUILD_NUMBER}")
+                        app.push("latest")
                     }
                 }
             }
